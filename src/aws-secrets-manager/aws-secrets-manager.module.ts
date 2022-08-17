@@ -1,47 +1,37 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import {
+  AWSSecretsManagerModuleAsyncOptions,
+  AWSSecretsManagerModuleOptions,
+} from './aws-secrets-manager.interface';
+import {
+  createAWSSecretsManagerAsyncProviders,
+  createAWSSecretsManagerProviders,
+} from './aws-secrets-manager.provider';
 
 import { AWSSecretsService } from './aws-secrets-manager.service';
-import { AWS_SECRETS_ARN, AWS_SECRETS_DEBUG, AWS_SECRETS_MANAGER_TOKEN, AWS_SECRETS_SET_ENV } from './contstants';
-
-export interface AWSSecretsManagerModuleOptions {
-  secretsManager: SecretsManagerClient;
-  isSetToEnv?: boolean;
-  secretsArn: string[];
-  isDebug?: boolean;
-}
 
 @Global()
 @Module({})
 export class AWSSecretsManagerModule {
-  static forRoot({
-    secretsManager,
-    isSetToEnv = true,
-    secretsArn,
-    isDebug = false,
-  }: AWSSecretsManagerModuleOptions): DynamicModule {
+  static forRoot(options: AWSSecretsManagerModuleOptions): DynamicModule {
+    const providers = createAWSSecretsManagerProviders(options);
     return {
       module: AWSSecretsManagerModule,
-      providers: [
-        AWSSecretsService,
-        {
-          provide: AWS_SECRETS_MANAGER_TOKEN,
-          useValue: secretsManager,
-        },
-        {
-          provide: AWS_SECRETS_SET_ENV,
-          useValue: isSetToEnv,
-        },
-        {
-          provide: AWS_SECRETS_ARN,
-          useValue: secretsArn,
-        },
-        {
-          provide: AWS_SECRETS_DEBUG,
-          useValue: isDebug
-        }
-      ],
+      providers,
       exports: [AWSSecretsService],
     };
+  }
+
+  public static forRootAsync(
+    options: AWSSecretsManagerModuleAsyncOptions,
+  ): DynamicModule {
+    const providers = createAWSSecretsManagerAsyncProviders(options);
+
+    return {
+      module: AWSSecretsManagerModule,
+      imports: options.imports,
+      providers: providers,
+      exports: providers,
+    } as DynamicModule;
   }
 }

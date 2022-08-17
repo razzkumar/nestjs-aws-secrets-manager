@@ -1,26 +1,17 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
-import { GetSecretValueCommand, SecretsManager } from '@aws-sdk/client-secrets-manager';
+import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
-import { AWS_SECRETS_MANAGER_TOKEN, AWS_SECRETS_ARN, AWS_SECRETS_SET_ENV, AWS_SECRETS_DEBUG } from './contstants';
+import { AWS_SECRETS_MANAGER_MODULE_OPTIONS } from './contstants';
+import { AWSSecretsManagerModuleOptions } from './aws-secrets-manager.interface';
 
 @Injectable()
 export class AWSSecretsService {
-
   private readonly logger = new Logger(AWSSecretsService.name);
 
   constructor(
-    @Inject(AWS_SECRETS_MANAGER_TOKEN)
-    private readonly secretsManager: SecretsManager,
-
-    @Inject(AWS_SECRETS_SET_ENV)
-    private readonly isSetToEnv: boolean,
-
-    @Inject(AWS_SECRETS_ARN)
-    private readonly secretsArns: string[],
-
-    @Inject(AWS_SECRETS_DEBUG)
-    private readonly isDebug: Boolean
+    @Inject(AWS_SECRETS_MANAGER_MODULE_OPTIONS)
+    private readonly options: AWSSecretsManagerModuleOptions,
   ) {
     this.setAllSecrectToEnv();
   }
@@ -28,24 +19,27 @@ export class AWSSecretsService {
   async setAllSecrectToEnv() {
     const secrets = await this.getAllSecrects();
 
-    if (this.isSetToEnv) {
-      Object.keys(secrets).forEach(key => {
+    if (this.options.isSetToEnv) {
+      Object.keys(secrets).forEach((key) => {
         process.env[key] = secrets[key];
-      }
-      );
+      });
     }
-    if (this.isDebug) {
+    if (this.options.isDebug) {
       this.logger.log(JSON.stringify(secrets, null, 2));
     }
   }
 
   async getAllSecrects<T>() {
+    const commands = this.options.secretsArn.map(
+      (secretId) =>
+        new GetSecretValueCommand({
+          SecretId: secretId,
+        }),
+    );
 
-    const commands = this.secretsArns.map(secretId => new GetSecretValueCommand({
-      SecretId: secretId,
-    }));
-
-    const resp = commands.map(command => this.secretsManager.send(command));
+    const resp = commands.map((command) =>
+      this.options.secretsManager.send(command),
+    );
 
     const secrets = await Promise.all(resp);
 
@@ -55,13 +49,11 @@ export class AWSSecretsService {
       const allSecrets = {
         ...acc,
         ...sec,
-      }
+      };
       return allSecrets;
-    }
-      , {});
+    }, {});
 
     return response as T;
-
   }
 
   async getSecrets<T>(secretId: string) {
@@ -69,9 +61,8 @@ export class AWSSecretsService {
       SecretId: secretId,
     } as any);
 
-    const secret = await this.secretsManager.send(command);
+    const secret = await this.options.secretsManager.send(command);
 
-    return JSON.parse(secret.SecretString) as T
+    return JSON.parse(secret.SecretString) as T;
   }
-
 }
