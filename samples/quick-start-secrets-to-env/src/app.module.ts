@@ -9,7 +9,7 @@ const AWSSecretsManagerProps: AWSSecretsManagerModuleOptions = {
   secretsManager: new SecretsManagerClient({
     region: "ap-south-1"
   }),
-  isSetToEnv: true,
+  isSetToEnv: true, // set all secrets to env variables which will be available in process.env or @nest/config module
   secretsSource: "test/sm" // OR array or secrets name or ARN  [ "db/prod/config" ,"app/prod/config"],
 };
 
