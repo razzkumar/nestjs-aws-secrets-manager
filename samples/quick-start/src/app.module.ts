@@ -1,25 +1,25 @@
-import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { Module } from '@nestjs/common';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+
 import { AWSSecretsManagerModule, AWSSecretsManagerModuleOptions, } from 'nestjs-aws-secrets-manager';
-import { AppController } from './app.controller';
+
 import { AppService } from './app.service';
+import { AppController } from './app.controller';
+import { AWSDBCredentialsService } from './aws-secrets.service';
 
 const AWSSecretsManagerProps: AWSSecretsManagerModuleOptions = {
   secretsManager: new SecretsManagerClient({
     region: "ap-south-1"
   }),
-  isSetToEnv: true,
-  secretsArn: [
-    "arn:aws:secretsmanager:ap-south-1:226134266737:secret:test/sm-lkcVqD"
-  ]
 };
 
 
 @Module({
   imports: [
-    AWSSecretsManagerModule.forRoot(AWSSecretsManagerProps)
+    AWSSecretsManagerModule.forRoot(AWSSecretsManagerProps),
+    AWSDBCredentialsService
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AWSDBCredentialsService],
 })
 export class AppModule { }
