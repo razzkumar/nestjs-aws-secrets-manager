@@ -1,11 +1,11 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 
 import { AWS_SECRETS_ARN, AWS_SECRETS_MANAGER_TOKEN, AWS_SECRETS_SET_ENV } from './contstants';
-import { SecretsManager } from '@aws-sdk/client-secrets-manager';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { AWSSecretsService } from './aws-secrets-manager.service';
 
 export interface AWSSecretsManagerModuleOptions {
-  secretsManager: SecretsManager;
+  secretsManager: SecretsManagerClient;
   isSetToEnv: boolean;
   secretsArn: string[];
 }
