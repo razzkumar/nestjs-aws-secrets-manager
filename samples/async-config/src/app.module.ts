@@ -1,8 +1,9 @@
-import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { Module } from '@nestjs/common';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { AWSSecretsManagerModule } from 'nestjs-aws-secrets-manager';
-import { AppController } from './app.controller';
+
 import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
@@ -17,7 +18,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         }),
         isSetToEnv: true, // set all secrets to env variables which will be available in process.env or @nest/config module
         secretsSource: [
-          configService.get('AWS_SECRET_ID')
+          configService.get('AWS_SECRET_ID') // name or array of secret names
         ],
         isDebug: configService.get('NODE_ENV') === 'development'
       }),
