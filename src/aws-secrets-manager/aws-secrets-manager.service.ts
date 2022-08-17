@@ -13,24 +13,39 @@ export class AWSSecretsService {
     @Inject(AWS_SECRETS_MANAGER_MODULE_OPTIONS)
     private readonly options: AWSSecretsManagerModuleOptions,
   ) {
-    this.setAllSecrectToEnv();
+    if (this.options.secretsSource && this.options.isSetToEnv) {
+      this.setAllSecrectToEnv();
+    }
   }
 
   async setAllSecrectToEnv() {
     const secrets = await this.getAllSecrects();
 
-    if (this.options.isSetToEnv) {
-      Object.keys(secrets).forEach((key) => {
-        process.env[key] = secrets[key];
-      });
-    }
+    Object.keys(secrets).forEach((key) => {
+      process.env[key] = secrets[key];
+    });
+
+    this.logger.log(
+      `All secrets from aws secrets manager(id: ${JSON.stringify(
+        this.options.secretsSource,
+      )}) are set to env`,
+    );
+
     if (this.options.isDebug) {
       this.logger.log(JSON.stringify(secrets, null, 2));
     }
   }
 
   async getAllSecrects<T>() {
-    const commands = this.options.secretsArn.map(
+    const secretsIds = Array.isArray(this.options.secretsSource)
+      ? this.options.secretsSource
+      : [this.options.secretsSource];
+
+    if (!Boolean(secretsIds.length)) {
+      this.logger.log('Secrets source is empty');
+    }
+
+    const commands = secretsIds.map(
       (secretId) =>
         new GetSecretValueCommand({
           SecretId: secretId,
@@ -56,7 +71,7 @@ export class AWSSecretsService {
     return response as T;
   }
 
-  async getSecrets<T>(secretId: string) {
+  async getSecretsByID<T>(secretId: string) {
     const command = new GetSecretValueCommand({
       SecretId: secretId,
     } as any);

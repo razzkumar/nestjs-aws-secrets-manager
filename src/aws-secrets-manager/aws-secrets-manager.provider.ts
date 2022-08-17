@@ -1,8 +1,8 @@
 import { Provider, Type } from '@nestjs/common';
 
 import {
-  AWSSecretsManagerModuleAsyncOptions,
   AWSSecretsManagerModuleOptions,
+  AWSSecretsManagerModuleAsyncOptions,
   AWSSecretsManagerModuleOptionsFactory,
 } from './aws-secrets-manager.interface';
 import { AWSSecretsService } from './aws-secrets-manager.service';
