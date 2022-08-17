@@ -3,14 +3,14 @@
 </p>
 
 <p align="center">
-  A <a href="https://github.com/nestjs/nest">Nest</a> module wrapper for <a href="https://aws.amazon.com/secrets-manager/">aws secrets manager</a> 
+  A <a href="https://github.com/nestjs/nest" target="_blank">Nest</a> module wrapper for <a href="https://aws.amazon.com/secrets-manager/" target="_blank">aws secrets manager</a> 
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/nestjs-aws-secrets-manager"><img alt="NPM version" src="https://img.shields.io/npm/v/nestjs-aws-secrets-manager.svg" /></a>
   <a href="https://www.npmjs.com/package/nestjs-aws-secrets-manager"><img alt="NPM downloads" src="https://img.shields.io/npm/dw/nestjs-aws-secrets-manager.svg" /></a>
-  <a href="https://github.com/gremo/nestjs-aws-secrets-manager/pulse"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/gremo/nestjs-aws-secrets-manager"></a>
-  <a href="https://github.com/gremo/nestjs-aws-secrets-manager/graphs/contributors" alt="Contributors"><img src="https://img.shields.io/github/contributors/gremo/nestjs-aws-secrets-manager" /></a>
+  <a href="https://github.com/razzkumar/nestjs-aws-secrets-manager/pulse"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/razzkumar/nestjs-aws-secrets-manager"></a>
+  <a href="https://github.com/razzkumar/nestjs-aws-secrets-manager/graphs/contributors" alt="Contributors"><img src="https://img.shields.io/github/contributors/razzkumar/nestjs-aws-secrets-manager" /></a>
   <!-- <a href="https://paypal.me/razzkumar" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a> -->
 </p>
 
@@ -18,7 +18,7 @@
 ## Installation
 
 ```bash
-npm install --save nestjs-aws-secrets-manager @aws-sdk/client-secrets-manager
+npm i nestjs-aws-secrets-manager @aws-sdk/client-secrets-manager
 ```
 
 Having troubles configuring `nestjs-aws-secrets-manager`? Clone this repository and `cd` in a sample:
@@ -31,7 +31,7 @@ npm run start:dev
 
 ## Quick start
 
-Import `AWSSecretsManagerModule` into the root `AppModule` and use the `forRoot()` method to configure it. This method accepts the object as `AWSSecretsManagerModuleOptions`, you also can full example code
+Import `AWSSecretsManagerModule` into the root `AppModule` and use the `forRoot()` method to configure it. This method accepts the object as [AWSSecretsManagerModuleOptions](https://github.com/razzkumar/nestjs-aws-secrets-manager#options), you can also checkout [samples](https://github.com/razzkumar/nestjs-aws-secrets-manager/tree/main/samples)
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -64,6 +64,8 @@ export class AppModule { }
 
 ### Create the Secrets Manager Service
 
+Now we have `getSecretsByID` method on `AWSSecretsService` from we can retrive aws secrets using name or ARN
+
 ```typescript
 import { Injectable } from '@nestjs/common';
 import { AWSSecretsService } from 'nestjs-aws-secrets-manager';
@@ -87,7 +89,9 @@ export class AWSDBCredentialsService {
 
 ```
 
-### set env varialbes from aws secrets manager
+### Set process env variables from aws secrets manager
+
+We also can able to set value on process on starting, which allows us to retrive secrets using `process.env` or `@nest/config` module
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -164,7 +168,7 @@ The factory might be async, can inject dependencies with `inject` option and imp
 
 ### Options
 
-Configuration options parameter `AWSSecretsManagerModuleOptions`
+Configuration options parameter for `AWSSecretsManagerModule` is defined as `AWSSecretsManagerModuleOptions` interface
 
 ```typescript
 export interface AWSSecretsManagerModuleOptions {
@@ -174,13 +178,19 @@ export interface AWSSecretsManagerModuleOptions {
   isDebug?: boolean;
 }
 ```
+which is available for import from `nestjs-aws-secrets-manager` module
+
+```typescript
+import { AWSSecretsManagerModuleOptions, } from 'nestjs-aws-secrets-manager';
+
+```
 
 ## Contributing
 
 New features and bugfixes are always welcome! In order to contribute to this project, follow a few easy steps:
 
 <!-- <p align="center"> -->
-<!--   <a href="https://paypal.me/marcopolichetti" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a> -->
+<!--   <a href="https://paypal.me/razzkumar" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a> -->
 <!-- </p> -->
 
 1. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) this repository and clone it on your machine
