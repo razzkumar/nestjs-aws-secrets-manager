@@ -19,65 +19,82 @@ export class AWSSecretsService {
   }
 
   async setAllSecrectToEnv() {
-    const secrets = await this.getAllSecrects();
+    try {
+      const secrets = await this.getAllSecrects();
 
-    Object.keys(secrets).forEach((key) => {
-      process.env[key] = secrets[key];
-    });
+      if (!secrets) {
+        this.logger.warn('There is no secrets to set in env');
+        return;
+      }
 
-    this.logger.log(
-      `All secrets from aws secrets manager(id: ${JSON.stringify(
-        this.options.secretsSource,
-      )}) are set to env`,
-    );
+      Object.keys(secrets).forEach((key) => {
+        process.env[key] = secrets[key];
+      });
 
-    if (this.options.isDebug) {
-      this.logger.log(JSON.stringify(secrets, null, 2));
+      this.logger.log(
+        `All secrets from aws secrets manager(id: ${JSON.stringify(
+          this.options.secretsSource,
+        )}) are set to env`,
+      );
+
+      if (this.options.isDebug) {
+        this.logger.log(JSON.stringify(secrets, null, 2));
+      }
+    } catch (err: any) {
+      this.logger.error(err.message);
     }
   }
 
   async getAllSecrects<T>() {
-    const secretsIds = Array.isArray(this.options.secretsSource)
-      ? this.options.secretsSource
-      : [this.options.secretsSource];
+    try {
+      const secretsIds = Array.isArray(this.options.secretsSource)
+        ? this.options.secretsSource
+        : [this.options.secretsSource];
 
-    if (!Boolean(secretsIds.length)) {
-      this.logger.log('Secrets source is empty');
+      if (!Boolean(secretsIds.length)) {
+        this.logger.log('Secrets source is empty');
+      }
+
+      const commands = secretsIds.map(
+        (secretId) =>
+          new GetSecretValueCommand({
+            SecretId: secretId,
+          }),
+      );
+
+      const resp = commands.map((command) =>
+        this.options.secretsManager.send(command),
+      );
+
+      const secrets = await Promise.all(resp);
+
+      const response = secrets.reduce((acc, secret) => {
+        const sec = JSON.parse(secret.SecretString);
+
+        const allSecrets = {
+          ...acc,
+          ...sec,
+        };
+        return allSecrets;
+      }, {});
+
+      return response as T;
+    } catch (e: any) {
+      this.logger.error(`Unable to fetch secrets(${e.message})`);
     }
-
-    const commands = secretsIds.map(
-      (secretId) =>
-        new GetSecretValueCommand({
-          SecretId: secretId,
-        }),
-    );
-
-    const resp = commands.map((command) =>
-      this.options.secretsManager.send(command),
-    );
-
-    const secrets = await Promise.all(resp);
-
-    const response = secrets.reduce((acc, secret) => {
-      const sec = JSON.parse(secret.SecretString);
-
-      const allSecrets = {
-        ...acc,
-        ...sec,
-      };
-      return allSecrets;
-    }, {});
-
-    return response as T;
   }
 
   async getSecretsByID<T>(secretId: string) {
-    const command = new GetSecretValueCommand({
-      SecretId: secretId,
-    } as any);
+    try {
+      const command = new GetSecretValueCommand({
+        SecretId: secretId,
+      } as any);
 
-    const secret = await this.options.secretsManager.send(command);
+      const secret = await this.options.secretsManager.send(command);
 
-    return JSON.parse(secret.SecretString) as T;
+      return JSON.parse(secret.SecretString) as T;
+    } catch (e: any) {
+      this.logger.error(`Unable to fetch secrets(${e.message})`);
+    }
   }
 }
