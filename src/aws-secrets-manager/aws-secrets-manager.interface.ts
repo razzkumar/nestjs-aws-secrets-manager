@@ -5,7 +5,7 @@ import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 export interface AWSSecretsManagerModuleOptions {
   secretsManager: SecretsManagerClient;
   isSetToEnv?: boolean;
-  secretsSource?: string | string[];
+  secretsSource?: object;
   isDebug?: boolean;
 }
 

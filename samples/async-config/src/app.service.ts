@@ -8,7 +8,7 @@ export class AppService {
 
   getHello(): string {
     return JSON.stringify({
-      RANDOM: this.configService.get('RANDOM'), // check if the environment variable is set or not by nestjs-aws-secrets-manager module
+      RANDOM: this.configService.get('secret1'), // check if the environment variable is set or not by nestjs-aws-secrets-manager module
     });
   }
 }

@@ -17,9 +17,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           region: configService.get('AWS_REGION')
         }),
         isSetToEnv: true, // set all secrets to env variables which will be available in process.env or @nest/config module
-        secretsSource: [
-          configService.get('AWS_SECRET_ID') // name or array of secret names
-        ],
+        secretsSource: { 
+          secret1: configService.get('AWS_SECRET_ID') // name or array of secret names
+        },
         isDebug: configService.get('NODE_ENV') === 'development'
       }),
       inject: [ConfigService],

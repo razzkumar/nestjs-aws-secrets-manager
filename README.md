@@ -106,9 +106,8 @@ const AWSSecretsManagerProps: AWSSecretsManagerModuleOptions = {
     region: "ap-south-1"
   }),
   isSetToEnv: true, // set all secrets to env variables which will be available in process.env or @nest/config module
-  secretsSource: "test/sm" // OR array or secrets name or ARN  [ "db/prod/config" ,"app/prod/config"],
+  secretsSource: { secret1: 'test/sm1', secret2: 'test/sm2' }, // Object with secrets name or ARN as values and required key in environment variable
 };
-
 
 @Module({
   imports: [
@@ -149,10 +148,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           region: configService.get('AWS_REGION')
         }),
         isSetToEnv: true, // set all secrets to env variables which will be available in process.env or @nest/config module
-        secretsSource: [
-          configService.get('AWS_SECRET_ID') // name or array of secret names
-        ],
-        isDebug: configService.get('NODE_ENV') === 'development'
+        secretsSource: { secret1: 'test/secretId1', secret2: 'test/secretId2' },
+        isDebug: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
