@@ -28,7 +28,7 @@ export class AWSSecretsService {
       }
 
       Object.keys(secrets).forEach((key) => {
-        process.env[key] = secrets[key];
+        process.env[key] = JSON.stringify(secrets[key]);
       });
 
       this.logger.log(
@@ -47,18 +47,16 @@ export class AWSSecretsService {
 
   async getAllSecrects<T>() {
     try {
-      const secretsIds = Array.isArray(this.options.secretsSource)
-        ? this.options.secretsSource
-        : [this.options.secretsSource];
+      const keys = Object.keys(this.options.secretsSource);
 
-      if (!Boolean(secretsIds.length)) {
+      if (!Boolean(keys.length)) {
         this.logger.log('Secrets source is empty');
       }
 
-      const commands = secretsIds.map(
-        (secretId) =>
+      const commands = keys.map(
+        (key) =>
           new GetSecretValueCommand({
-            SecretId: secretId,
+            SecretId: this.options.secretsSource[key],
           }),
       );
 
@@ -68,12 +66,15 @@ export class AWSSecretsService {
 
       const secrets = await Promise.all(resp);
 
-      const response = secrets.reduce((acc, secret) => {
+      const response = secrets.reduce((acc, secret, index) => {
         const sec = JSON.parse(secret.SecretString);
+        const secretObject = {};
+
+        secretObject[keys[index]] = sec;
 
         const allSecrets = {
           ...acc,
-          ...sec,
+          ...secretObject,
         };
         return allSecrets;
       }, {});
